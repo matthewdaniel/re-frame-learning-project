@@ -1,0 +1,306 @@
+
+html, body, #app {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    justify-content: stretch;
+    .main-inner {
+        display: flex;
+        justify-content: stretch;
+        flex: 1;
+    }
+}
+.header-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    .progress-bar {
+        background-color: darkgray;
+        height: 5px;
+        position: relative;
+        
+        .progress {
+            height: 5px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            
+            transition: width 2s ease;
+            &.finalized {
+                background-color: limegreen;
+                border-color: darken(limegreen, 40%);
+                z-index: 1;
+            }
+    
+            &.viewed {
+                background-color: wheat;
+                border-color: darken(wheat, 40%);
+                z-index: 3;
+            }
+    
+            &.edited {
+                background-color: darkorange;
+                border-color: darken(darkorange, 40%);
+                z-index: 2;
+            }
+        }
+    }
+
+    .batch-title-bar {
+        background-color: lightgray;
+        padding: 5px;
+        display: flex;
+        justify-content: space-between;
+    
+        border-top: 1px solid #333;
+        font-size: 19px;
+    
+        .expiring-soon {
+            color: darkred;
+        }
+    
+        .countdown {
+            z-index: 102;
+        }
+
+        .blains {
+            font-weight: bold;
+        }
+    
+        .title {
+            color: #337ab7;
+        }
+    }
+}
+
+.list-box {
+    background-color: #f5f5f5;
+    
+    overflow-y: auto;
+    width: 250px;
+    transition: width .25s ease;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    .single-item-container:hover {
+        background-color: #fff;
+        
+    }
+    .action-items {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #555;
+        padding-top: 10px;
+        margin-bottom: -5px;
+        i {
+            padding: 0 10px;
+        }
+    }
+    .wrapper {
+        padding-top: 25px;
+    }
+
+    &.minimized {
+        width: 40px;
+        .wrapper > * {
+            display: none;
+        }
+        .wrapper > .toggler {
+            display: inline-block;
+        }
+    }
+
+    .legend-toggle {
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        text-decoration: none;
+    }
+    .legend {
+        height: 100px;
+        overflow: hidden;
+        transition: height .15s ease;
+        padding: 8px;
+        i { font-size: 13px; }
+        .inner { 
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        div {
+            padding-top: 2px;
+            padding-bottom: 2px;
+            width: 100%;
+        }
+
+        &.minimized {
+            height: 0;
+        }
+    }
+
+    .filter {
+        text-align: center;
+
+    }
+    .toggler {
+        padding: 8px;
+        top: 0;
+        right: 0;
+        position: absolute;
+        font-size: 28px;
+        cursor: pointer;
+        color: #888;
+        &:hover {
+            color: #000;
+        }
+    }
+
+    .list-wrapper {
+        position: relative;
+        .list-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+            display: flex;
+            align-items: flex-start;
+            padding-top: 30px;
+            justify-content: center;
+            z-index: 1;
+            font-size: 25px;
+            background-color: rgba(245,245,245,.7);
+            cursor: wait;
+        }
+    }
+    ul {
+        padding-left: 0;
+        margin-left: 0;
+        list-style-type: none;
+        border-top: 1px solid #337ab7;
+        position: relative;
+        margin-top: 10px;
+
+        li {
+            border-left: 50px dashed transparent;
+            border-right: 50px dashed transparent;
+        
+            border-bottom: 1px solid #337ab7;
+            padding: 0;
+            margin: 0;
+            padding-top: 3px;
+            position: relative;
+        
+            &.checked-out {
+                background: #aaa !important;
+                a { color: #777 !important; }
+            }
+        
+            &.active {
+                &, &:hover, a, a:hover, a:focus {
+                    color: #fff !important;
+                    background-color: #396182;
+                }   
+            }
+            .inner {
+                margin-left: -50px;
+                margin-right: -50px;
+                padding: 3px;
+                padding-right: 5px;
+        
+                a {
+                    color: #337ab7;
+                    display: flex;
+                    justify-content: space-between;
+                    text-decoration: none;
+                    font-size: 11.5px;
+                    
+                    .name { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; padding-left: 3px }
+                    .icon-group { flex-shrink: 1; }
+                    i { padding-left: 3px; }
+                }
+            }
+        
+            a { 
+                white-space: nowrap;
+            }
+        }
+    }
+}
+
+.fields-container {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    padding: 25px;
+    
+    .field-container {
+        .field-label-value {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            label {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+.upcs {
+    max-height: 75px;
+    overflow: hidden;
+    user-select: none;
+    list-style: none;
+    margin-left: 10px;
+
+    &.expanded {
+        max-height: inherit;
+    }
+    .expander {
+        cursor: pointer;
+        text-align: center;
+        user-select: none;
+        color: #337ab7;
+    }
+    
+    
+    .copy {
+        cursor: pointer;
+        transition: background-color 0.2s ease
+    }
+    
+    .copy.highlight {
+        
+        background-color: cyan;
+    }
+    
+    ul  {
+        margin-left: 0;
+        padding-left: 0;    
+    
+        li {
+            display: inline-block;
+            padding: 2px;
+            border: 1px solid lightgrey;
+            border-radius: 4px;
+            margin: 5px;
+            span {
+                margin-right: 8px;
+            }
+        }
+    }
+}
