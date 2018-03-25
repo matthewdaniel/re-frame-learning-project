@@ -6,6 +6,7 @@
         [goog.string :refer [toSelectorCase toCamelCase]]
         [cljs.pprint :refer [pprint]]
         [day8.re-frame.http-fx]
+        [clojure.string :as s]
         [ajax.core :as ajax]
         [re-frame.core :as rf]
         [cljs.core.async :refer [<!]] [cljs-http.client :as http])
@@ -36,7 +37,9 @@
 ;              {:when :seen? :events :success-details-fetched :dispatch [:do-load-details]}
 ;              {:when :seen? :events}]})
 
-(defn can-descend [val] (or (seq? val) (map? val)));
+(defn can-descend [val]
+      (or (seq? val) (map? val) (vector? val)))
+
 ; (defn descender [val] (if (or (seq? val) (map? val)) (snake-kebab-it val) val))
 
 (defn snake-kebab-it
@@ -54,23 +57,17 @@
 
 (defn connect-batch
     []
+    (js/console.log "connecting")
     (let [con (aget js/window "hubConnection")
           batchWsApi (aget js/window "batchWsApi")
           server (aget batchWsApi "server")]
         (.on batchWsApi "listUpdate" #(rf/dispatch [:list-updated %]))
         (.on batchWsApi "notifyError" #(rf/dispatch [:list-update-error %]))
         
-        (pprint "START!")
-        (-> con
-            ((fn 
-                [con] 
-                (js/window.hubConnection.start)))
-            ((fn 
-                [conStart] 
-                ((get conStart "done"
-                    ((fn [_]
-                        (pprint "yo done")
-                        
+        (js/console.log "START!")
+        (-> (js/window.hubConnection.start)
+            (#(.done %
+                    (fn [_]
                         (def sess-id (aget con "id"))
                         (rf/dispatch [:sess-id sess-id])
 
@@ -80,12 +77,22 @@
                             :checkout-item
                             (fn [db [_ item-id]]
                                 (js/window.batch-checkout "81294b8a-adfb-4687-8b4d-5f12540d3d59" item-id)
-                                db)))))))))
+                                db))))))
                         
             
         batchWsApi
         nil))
 
+
+(rf/reg-event-db
+    :set-items-filter
+    (fn [db [_ txt]]
+        (assoc db :item-filter txt)))
+
+(rf/reg-sub
+    :item-filter
+    (fn [db _]
+     (:item-filter db)))
 
 (rf/reg-event-db
     :sess-id
@@ -140,6 +147,13 @@
     (fn [db _]
         (:edit-fields db)))
 
+(rf/reg-sub
+    :field-dirty-val
+    (fn [db [_ field-id]]
+        (get-in db [:field-changes field-id])))
+
+
+
 (rf/reg-event-fx
     :editing-field
     (fn [{:keys [db]} [_ item-id]]
@@ -169,6 +183,18 @@
     (fn [db _]
         (sort-by #(:id %) (:batch-list db))))
 
+(defn- item-matches
+    [kw item]
+    (s/includes? (s/lower-case (:description item)) (s/lower-case (or kw "")) ))
+
+(rf/reg-sub
+    :filtered-batch-items
+    :<- [:batch-list]
+    :<- [:item-filter]
+    (fn [[list key-word] _]
+        (let [filtered (filter (partial item-matches key-word) list)]
+            filtered)))
+
 (rf/reg-event-db
     :set-batch-data
     (fn [db [_ result]]
@@ -178,15 +204,6 @@
     :bork-it-up
     (fn [db [_ resultset-seq]]
         (assoc db :failed true)))
-
-
-
-
-    
-
-
-
-
 
     
 (rf/reg-event-fx
@@ -232,7 +249,6 @@
 (rf/reg-event-db
     :update-field-val
     (fn [db [_ {:keys [field-id new-value]}]]
-        (pprint {:test field-id :val new-value})
         (assoc-in db [:field-changes field-id] new-value)))
 
 (rf/reg-sub

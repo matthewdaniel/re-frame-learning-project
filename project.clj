@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript  "1.9.908"]
                  [reagent  "0.7.0"]
                  [cljs-http "0.1.44"]
+                 [re-com "0.9.0"]
                  [camel-snake-kebab "0.4.0"]
                  [fentontravers/reframe-websocket "0.1.4"]
                  [cljsjs/moment "2.17.1-1"]
@@ -28,7 +29,8 @@
                                                      :elide-asserts true
                                                      :pretty-print false}}}}}}
 
-  :figwheel {:repl false}
+  :figwheel {:repl false :server-port 3449}
+  
 
   :clean-targets ^{:protect false} ["resources/public/js"]
 
