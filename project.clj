@@ -17,8 +17,8 @@
   :hooks [leiningen.cljsbuild]
 
   :profiles {:dev {:cljsbuild
-                   {:builds {:client {:figwheel     {:on-jsload "simple.core/run"}
-                                      :compiler     {:main "simple.core"
+                   {:builds {:client {:figwheel     {:on-jsload "portal.core/run"}
+                                      :compiler     {:main "portal.core"
                                                      :asset-path "js"
                                                      :optimizations :none
                                                      :source-map true
