@@ -15,4 +15,4 @@ document.execCommand("copy");
 return document.body.removeChild(el);
 });
 
-//# sourceMappingURL=misc.js.map?rel=1521835498619
+//# sourceMappingURL=misc.js.map?rel=1521903936645

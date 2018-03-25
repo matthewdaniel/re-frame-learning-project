@@ -4,7 +4,8 @@
             [clojure.string :as str]
             [cljs.pprint :refer [pprint]]
             [simple.views]
-            [simple.views.batch-items]
+            [simple.views.batchItems]
+            [simple.views.editBar]
             [simple.views.fields]
             [simple.events]
             [simple.events :as ev]))
@@ -90,19 +91,34 @@
    [clock]
    [color-input]])
 
+(rf/reg-sub
+  :initial-load-finished
+  (fn [{:keys [sess-id]} _]
+    (js/console.log "sess-id" sess-id)
+    (not (not sess-id))))
 ;; -- Entry Point -------------------------------------------------------------
+
+(defn- main-window
+  []
+  (-> @(rf/subscribe [:initial-load-finished])
+      ((fn [is-subbed]
+         (if-not is-subbed
+           [:div.connecting
+             [:span "Connecting..."]
+             [:i.fa.fa-spin.fa-spinner]]
+           [:div.main-inner
+             [simple.views.batchItems/batch-items-container]
+             [simple.views.editBar/edit-bar]
+             [simple.views.fields/fields-container]])))))
+
 
 (defn ^:export run
   []
-  (rf/dispatch-sync [:get-batch-details])     ;; puts a value into application state
+  (rf/dispatch [:get-batch-details])
   (reagent/render [:div.main 
                     [simple.views/header]
-                    [:div.main-inner
-                      [simple.views.batch-items/batch-items-container]
-                      [simple.views.fields/fields-container]]] 
-                        
-                      
-                  (js/document.getElementById "app")))
+                    [main-window]]
+    (js/document.getElementById "app")))
 
                   
 (defonce yo (simple.events/connect-batch))
