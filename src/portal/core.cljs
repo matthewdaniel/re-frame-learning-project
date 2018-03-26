@@ -4,9 +4,10 @@
             [clojure.string :as str]
             [cljs.pprint :refer [pprint]]
             [portal.views]
-            [portal.views.batch-items]
-            [portal.views.edit-bar]
-            [portal.views.fields]
+            [portal.views.batch-items :refer [batch-items-container]]
+            [portal.views.edit-bar :refer [edit-bar]]
+            [portal.views.tutorial-player :refer [tutorial-player]]
+            [portal.views.fields :refer [fields-container]]
             [portal.events]
             [portal.events :as ev]))
 
@@ -30,10 +31,13 @@
              [:span "Connecting..."]
              [:i.fa.fa-spin.fa-spinner]]
            [:div.main-inner
-             [portal.views.batch-items/batch-items-container]
-             [portal.views.edit-bar/edit-bar]
-             [portal.views.fields/fields-container]])))))
-
+             [batch-items-container]
+             [edit-bar]
+             [fields-container]
+             [:div.tutorial-overlay 
+              {:class (if @(rf/subscribe [:tutorial-active]) "active")}]
+             [tutorial-player]])))))
+                        
 
 (defn ^:export run
   []

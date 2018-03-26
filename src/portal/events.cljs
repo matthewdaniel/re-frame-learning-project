@@ -6,33 +6,13 @@
         [goog.string :refer [toSelectorCase toCamelCase]]
         [cljs.pprint :refer [pprint]]
         [day8.re-frame.http-fx]
+        [portal.tutorials :refer [tutorial-steps]]
+        [portal.helpers.misc :as h]
         [clojure.string :as s]
         [ajax.core :as ajax]
         [re-frame.core :as rf]
         [cljs.core.async :refer [<!]] [cljs-http.client :as http])
   (:require-macros [cljs.core.async.macros :refer [go]]))
-
-(defn make-moment [val]
-    (if val (js/moment val) val))
-
-(defn momentify
-    [params]
-    (let [params (set params)]
-        #(->> %
-            (map (fn [[param val]]
-                    [param (if (contains? params param)
-                            (make-moment val)
-                            val)]))
-            (into {}))))
-
-(def formatter (ajax/json-response-format {:keywords? true}))
-
-(defn transform-ajax
-    [& formatters]
-    (assoc formatter :read #(-> %
-                                ((:read formatter))
-                                ((momentify '[:tokenExpires])))))
-
 
 (defn can-descend [val]
       (or (seq? val) (map? val) (vector? val)))
@@ -50,6 +30,15 @@
                 (map (fn [[param val]]
                       [(-> param (->kebab-case)) (if (can-descend val) (snake-kebab-it val) val)]))
                 (into {})))))
+
+(defn transform-ajax
+    [& formatters]
+    (assoc h/formatter :read #(-> %
+                                ((:read h/formatter))
+                                ((h/momentify '[:tokenExpires])))))
+
+
+
 
 (defn connect-batch
     "Connect to the websocket and pipe through events"
@@ -79,6 +68,23 @@
                                 db))))))
         batchWsApi
         nil))
+(rf/reg-event-db
+    :toggle-items-legend
+    (fn [db _]
+        (assoc db :show-items-legend (not (:show-items-legend db)))))
+
+(rf/reg-sub 
+    :show-items-legend
+    (fn [{:keys [show-items-legend]}]
+        show-items-legend))
+
+(rf/reg-sub
+    :items-legend-vis
+    :<- [:show-items-legend]
+    :<- [:tutorial-i-am-active :item-icon-legend]
+    (fn [[show tutorial-active] _]
+        (or show tutorial-active)))
+      
 
 
 (rf/reg-event-db
@@ -150,8 +156,6 @@
     (fn [db [_ field-id]]
         (get-in db [:field-changes field-id])))
 
-
-
 (rf/reg-event-fx
     :editing-field
     (fn [{:keys [db]} [_ item-id]]
@@ -161,7 +165,7 @@
              :http-xhrio {
                             :method :get
                             :uri (str "http://portal.blainsupply.com/apis/v1/edit-lists/81294b8a-adfb-4687-8b4d-5f12540d3d59/items/"item-id"/fields")
-                            :response-format formatter
+                            :response-format h/formatter
                             :on-success [:set-fields]
                             :on-failure [:bork-it-up-fields]}})))
 (rf/reg-event-db
@@ -173,10 +177,10 @@
 
 (rf/reg-sub
     :batch-list
-    (fn [db _]
-        (sort-by #(:id %) (:batch-list db))))
+    (fn [{:keys [batch-list]} _]
+        (sort-by #(:id %) batch-list)))
 
-(defn- item-matches
+(defn- item-matches-filter
     [kw item]
     (s/includes? (s/lower-case (:description item)) (s/lower-case (or kw ""))))
 
@@ -185,7 +189,7 @@
     :<- [:batch-list]
     :<- [:item-filter]
     (fn [[list key-word] _]
-        (if-not key-word list (filter (partial item-matches key-word) list))))
+        (if-not key-word list (filter (partial item-matches-filter key-word) list))))
 
 (rf/reg-event-db
     :set-batch-data
@@ -205,7 +209,7 @@
          :http-xhrio {
                         :method :get
                         :uri "http://portal.blainsupply.com/apis/v1/edit-lists/81294b8a-adfb-4687-8b4d-5f12540d3d59"
-                        :response-format (transform-ajax [:tokenExpires] formatter)
+                        :response-format (transform-ajax [:tokenExpires] h/formatter)
                         :on-success [:set-batch-data]
                         :on-failure [:bork-it-up]}}))
 
@@ -224,3 +228,102 @@
     (fn [db [_ field-id]]
         (update-in db [:field-changes] dissoc field-id)))
         
+
+        
+(rf/reg-event-db
+    :set-tutorial-step
+    (fn [db [_ step]]
+        (pprint {:new-step step})
+        (assoc db :tutorial-step step)))
+
+(rf/reg-sub
+    :tutorial-step
+    (fn [{:keys [tutorial-step]} _]
+        tutorial-step))
+
+(rf/reg-sub
+  :tutorial-active
+  :<- [:tutorial-step]
+  (fn [step _]
+    (not (not step))))
+  
+(rf/reg-sub
+    :tutorial-i-am-active
+    :<- [:tutorial-step]
+    (fn [step [_ check-step]]
+        (= step check-step)))
+    
+(rf/reg-sub
+    :tutorial/renderer
+    :<- [:tutorial-step]
+    #(get-in tutorial-steps [% :instructions]))
+
+(rf/reg-sub
+    :tutorial/step-spotlight-transparent-class
+    :<- [:tutorial-step]
+    #(if (get-in tutorial-steps [% :transparent]) "transparent"))
+
+(rf/reg-event-db
+    :tutorial/start
+    (fn [db _]
+        (assoc db :tutorial-step (first h/ordered-tutorial))))
+
+(rf/reg-event-db
+    :tutorial/next
+    (fn [{:keys [tutorial-step] :as db} _]
+        (assoc db :tutorial-step (h/tutorial-next tutorial-step))))
+
+(rf/reg-event-db
+    :tutorial/prev
+    (fn [{:keys [tutorial-step] :as db}]
+        (assoc db :tutorial-step (h/tutorial-prev tutorial-step))))
+(rf/reg-event-db
+    :tutorial/stop
+    (fn [db _]
+        (dissoc db :tutorial-step)))
+        
+(rf/reg-sub
+    :tutorial/on-first
+    :<- [:tutorial-step]
+    (fn [step _]
+        (= step (first h/ordered-tutorial))))
+
+(rf/reg-sub
+    :tutorial/count
+    :<- [:tutorial-step]
+    #(get-in tutorial-steps [% :order]))
+    
+(rf/reg-sub
+    :tutorial/on-last
+    :<- [:tutorial-step]
+    (fn [step _]
+        (= step (last h/ordered-tutorial))))
+
+        
+
+        
+(rf/reg-event-db 
+    :batch-items/hide-bar
+    (fn [db [_ hide]]
+        (assoc db :batch-items/hide-bar hide)))
+
+(rf/reg-sub
+    :batch-items/hide-bar
+    (fn [db _]
+        (:batch-items/hide-bar db)))
+
+(rf/reg-sub
+    :batch-items/bar-hidden
+    :<- [:batch-items/hide-bar]
+    :<- [:tutorial-i-am-active :minimize-side-bar]
+    :<- [:tutorial-i-am-active :maximize-side-bar]
+    (fn [[bar-hidden in-minimize-tutorial in-maximized-tutorial] _]
+        (pprint {:bar-hidden bar-hidden :in-min in-minimize-tutorial :in-max in-maximized-tutorial})
+        (and (not in-maximized-tutorial) (or bar-hidden in-minimize-tutorial))))
+
+(rf/reg-sub
+    :bar-minimized-class
+    (fn [_ _]
+        (rf/subscribe [:batch-items/bar-hidden]))
+    (fn [hidden _]
+        (if hidden "minimized" "")))

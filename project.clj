@@ -1,4 +1,4 @@
-(defproject simple "0.10.5"
+(defproject portal "0.10.5"
   :dependencies [[org.clojure/clojure        "1.8.0"]
                  [org.clojure/clojurescript  "1.9.908"]
                  [reagent  "0.7.0"]
@@ -16,10 +16,17 @@
 
   :hooks [leiningen.cljsbuild]
 
-  :profiles {:dev {:cljsbuild
+  :profiles {:dev {
+                    :dependencies 
+                    [[day8.re-frame/re-frame-10x "0.3.0"]]
+
+                    
+                    :cljsbuild
                    {:builds {:client {:figwheel     {:on-jsload "portal.core/run"}
                                       :compiler     {:main "portal.core"
                                                      :asset-path "js"
+                                                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                     :preloads             [day8.re-frame-10x.preload]
                                                      :optimizations :none
                                                      :source-map true
                                                      :source-map-timestamp true}}}}}
