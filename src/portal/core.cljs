@@ -3,6 +3,7 @@
             [re-frame.core :as rf]
             [clojure.string :as str]
             [cljs.pprint :refer [pprint]]
+            [re-com.core        :refer [modal-panel]]
             [portal.views]
             [portal.views.batch-items :refer [batch-items-container]]
             [portal.views.edit-bar :refer [edit-bar]]
@@ -36,7 +37,20 @@
              [fields-container]
              [:div.tutorial-overlay 
               {:class (if @(rf/subscribe [:tutorial-active]) "active")}]
-             [tutorial-player]])))))
+             [tutorial-player]
+             (-> @(rf/subscribe [:modal])
+               ((fn [{:keys [cancel ok header body] :as rest}]
+                 (when body
+                   [modal-panel
+                      :backdrop-color   "grey"
+                      :backdrop-opacity 0.4
+                      :style            {:font-family "Consolas"}
+                      :child            [:div.my-modal
+                                           [:div.modal-header [:h4.modal-title header]]
+                                           [:div.modal-body body]
+                                           [:div.modal-footer
+                                             [:button.btn.btn-warning {:on-click cancel} "Cancel"]
+                                             [:button.btn.btn-primary {:on-click ok} "Confirm"]]]]))))])))))
                         
 
 (defn ^:export run
@@ -45,7 +59,7 @@
   (reagent/render [:div.main 
                     [portal.views/header]
                     [main-window]]
+
     (js/document.getElementById "app")))
 
-                  
 (defonce yo (portal.events/connect-batch))

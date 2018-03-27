@@ -18,6 +18,9 @@
 (defn- make-moment [val]
     (if val (js/moment val) val))
 
+(def now (js/moment))
+(def fake-expiry
+      (.subtract now 2 "weeks"))
 (defn momentify
     [params]
     (let [params (set params)]

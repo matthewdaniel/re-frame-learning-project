@@ -73,6 +73,27 @@
     (fn [db _]
         (assoc db :show-items-legend (not (:show-items-legend db)))))
 
+(rf/reg-event-db
+    :show-finalize-modal
+    (fn [db _]
+      (assoc db :modal {:header "Confirm Batch Finalize"
+                         :ok #(when true (js/alert "Turned off for demo") (rf/dispatch [:close-finalize-modal]))
+                         :cancel #(rf/dispatch [:close-finalize-modal])
+                         :body [:div
+                                    [:p "By finalizing this batch you will loose access to it in the future."]
+                                    [:p "Are you certain you would like to proceed?"]]})))
+
+(rf/reg-event-db
+    :close-finalize-modal
+    (fn [db _] (dissoc db :modal)))
+
+(rf/reg-sub
+    :modal
+    (fn [{:keys [modal]}]
+      (pprint {:modal-test modal})
+      modal))
+
+
 (rf/reg-sub 
     :show-items-legend
     (fn [{:keys [show-items-legend]}]
@@ -259,9 +280,24 @@
     #(get-in tutorial-steps [% :instructions]))
 
 (rf/reg-sub
-    :tutorial/step-spotlight-transparent-class
+    :tutorial/step-spotlight-class
     :<- [:tutorial-step]
-    #(if (get-in tutorial-steps [% :transparent]) "transparent"))
+    #(str (if (get-in tutorial-steps [% :transparent]) "transparent")
+          (if (get-in tutorial-steps [% :invert-color]) " inverted")))
+
+(rf/reg-sub
+    :batch-expires
+    :<- [:batch-overview]
+    :<- [:tutorial-i-am-active :batch-expires]
+    (fn [[{:keys [tokenExpires]} in-tutorial] _]
+      (let [expiry (or tokenExpires h/fake-expiry)
+            hours-full (.diff tokenExpires h/now "hours")
+            minutes-full (.diff tokenExpires h/now "minutes")
+
+            days (.diff tokenExpires h/now "days")
+            minutes (- minutes-full  (* hours-full  60))
+            hours (- hours-full  (* days  24))]
+           (when (or tokenExpires in-tutorial) {:days days :minutes minutes :hours hours}))))
 
 (rf/reg-event-db
     :tutorial/start
@@ -318,7 +354,6 @@
     :<- [:tutorial-i-am-active :minimize-side-bar]
     :<- [:tutorial-i-am-active :maximize-side-bar]
     (fn [[bar-hidden in-minimize-tutorial in-maximized-tutorial] _]
-        (pprint {:bar-hidden bar-hidden :in-min in-minimize-tutorial :in-max in-maximized-tutorial})
         (and (not in-maximized-tutorial) (or bar-hidden in-minimize-tutorial))))
 
 (rf/reg-sub
@@ -327,3 +362,13 @@
         (rf/subscribe [:batch-items/bar-hidden]))
     (fn [hidden _]
         (if hidden "minimized" "")))
+
+(rf/reg-event-db
+    :finalize-batch
+    (fn [db _]
+     (assoc db :finalize-batch true)))
+
+(rf/reg-event-db
+    :cancel-finalize-batch
+    (fn [db _]
+     (dissoc db :finalize-batch)))

@@ -30,8 +30,8 @@
                         [:li "Edited Items Progress"]
                         [:li "Marked Complete Progress"]]]}
         :edit-icon/save-action 
-            {:order 4 
-             :transparent true
+            {:order 4
+             :invert-color true
              :instructions
              [:div
                 [:h2
@@ -41,8 +41,8 @@
                 clicking back into it—at which point you will be prompted to either keep or discard your previous
                 unsaved changes."]]}
         :edit-icon/mark-complete 
-            {:order 5 
-             :transparent true
+            {:order 5
+             :invert-color true
              :instructions
                 [:div
                     [:h2 [:i.fa.fa-check-circle-o] " Mark Item Complete"]
@@ -51,21 +51,21 @@
                     need attention."]]}
         :edit-icon/mark-incomplete 
             {:order 6
-             :transparent true
+             :invert-color true
              :instructions
                 [:div
                     [:h2 [:i.fa.fa-check-circle] " Unmark Item Complete"]
                     [:p "This action simply reverses the previous one, removing the “complete” flag from an item."]]}
         :edit-icon/forget-changes 
-            {:order 7 
-             :transparent true
+            {:order 7
+             :invert-color true
              :instructions
                 [:div 
                     [:h2 [:i.fa.fa-trash] " Forget Changes"]
                     [:p "This action will discard any unsaved changes."]]}
         :edit-icon/release 
-            {:order 8 
-             :transparent true
+            {:order 8
+             :invert-color true
              :instructions
                 [:div 
                     [:h2 [:i.fa.fa-unlink] " Release Item"]
@@ -110,5 +110,21 @@
              :instructions
               [:div
                 [:h2 [:i.fa.fa-bars "Maximize the Sidebar"]]
-                [:p "Click this again to maximize the side bar"]]}})
+                [:p "Click this again to maximize the side bar"]]}
+        :batch-expires
+            {:order 14
+             :instructions
+              [:div
+                 [:h2 [:i.fa.fa-clock] "Batch Expiration"]
+                 [:p "Your batch will expire in the amount of time specified. This means that you will be locked out of
+                 the batch once the timer reaches zero, at which point Blain’s will receive the changes and determine what to do with them."]]}
+        :finalize-batch
+            {:order 15
+             :instructions
+               [:div
+                  [:h2 "Finalize Batch"]
+                  [:div.text-center.danger [:i.fa.fa-triangle] "Important"]
+                  [:p "Clicking on this button will finalize the batch. When a batch is finalized, it will
+                  be sent back to Blain Supply for review. At this point, you will no longer be able to edit the items,
+                  and anyone else who is currently editing will be kicked out."]]}})
 

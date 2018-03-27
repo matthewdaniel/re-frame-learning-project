@@ -6,26 +6,16 @@
               [cljs.pprint :refer [pprint]]
               [clojure.string :as str]))
 
-(def now (js/moment))
-              
 (defn expiry-element
     [{expires :tokenExpires}]
-    (if expires
-        (let [ 
-                ; pre calc
-                hours-full (.diff expires now "hours")
-                minutes-full (.diff expires now "minutes")
-
-                days (.diff expires now "days")
-                minutes (- minutes-full  (* hours-full  60))
-                hours (- hours-full  (* days  24))]
-
-            (if expires 
-                [:div 
-                    [:span (if days (str days "D "))]
-                    [:span (if hours (str hours "H "))]
-                    [:span (if minutes (str minutes "M"))]]))))
-
+    [:div.expiry
+       (-> @(rf/subscribe [:batch-expires])
+           ((fn [{:keys [days hours minutes]}]
+              (if (or days hours minutes)
+                [:div
+                 [:span (if days (str days "D "))]
+                 [:span (if hours (str hours "H "))]
+                 [:span (if minutes (str minutes "M"))]]))))])
 
 
 (defn header
@@ -37,7 +27,7 @@
                                                                          (:title))]
             [:div.countdown
                 (-> @(rf/subscribe [:batch-overview])
-                    (expiry-element))]]
+                    (#(when % [wrapper :batch-expires [expiry-element %]])))]]
                 
         [wrapper :progress-bar [:div.progress-bar
                                 [:div.background

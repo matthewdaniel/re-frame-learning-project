@@ -69,11 +69,8 @@
                         (->> @(rf/subscribe [:tutorial-i-am-active :single-item-edit])
                              (#(if % [wrapper :single-item-edit [batch-item {:item fake-item}]])))
                         (->> @(rf/subscribe [:filtered-batch-items])
-                            (map (fn [item sess-id] [batch-item {:key (:id item) :item item}])))]]]]])
-
-    
-
-                
-                            
-              
-
+                            (map (fn [item sess-id] [batch-item {:key (:id item) :item item}])))]]]]
+        [:div.finalize-btn.text-center
+           [wrapper :finalize-batch
+            [:button.btn.btn-primary.btn-sm {:on-click #(rf/dispatch [:show-finalize-modal])}
+                "Finalize"]]]])
