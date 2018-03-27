@@ -32,6 +32,10 @@
 
       window['batch_checkout'] = (key, id) => window['batchWsApi'].server.checkoutItemForEdit(key, id);
       window['batch_subscribe'] = (key) => {console.log('subscribing', key); window['batchWsApi'].server.subscribeBatch(key); console.log('subscribed')}
+      window['batch_uncheckout_all'] = () => {
+        console.log('here');
+        window['batchWsApi'].server.uncheckoutItems();
+      }
       
       
     </script>

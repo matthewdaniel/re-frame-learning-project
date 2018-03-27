@@ -115,7 +115,7 @@
             {:order 14
              :instructions
               [:div
-                 [:h2 [:i.fa.fa-clock] "Batch Expiration"]
+                 [:h2 [:i.fa.fa-clock-o] "Batch Expiration"]
                  [:p "Your batch will expire in the amount of time specified. This means that you will be locked out of
                  the batch once the timer reaches zero, at which point Blain’s will receive the changes and determine what to do with them."]]}
         :finalize-batch

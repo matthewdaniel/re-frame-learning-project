@@ -34,30 +34,35 @@
            [:div.main-inner
              [batch-items-container]
              [edit-bar]
-             [fields-container]
-             [:div.tutorial-overlay
-              {:class (if @(rf/subscribe [:tutorial-active]) "active")}]
-             [tutorial-player]
-             (-> @(rf/subscribe [:modal])
-               ((fn [{:keys [cancel ok header body] :as rest}]
-                 (when body
-                   [modal-panel
-                      :backdrop-color   "grey"
-                      :backdrop-opacity 0.4
-                      :style            {:font-family "Consolas"}
-                      :child            [:div.my-modal
-                                           [:div.modal-header [:h4.modal-title header]]
-                                           [:div.modal-body body]
-                                           [:div.modal-footer
-                                             [:button.btn.btn-warning {:on-click cancel} "Cancel"]
-                                             [:button.btn.btn-primary {:on-click ok} "Confirm"]]]]))))])))))
+             [fields-container]])))))
+             
                         
+(defn- tutorial 
+  []
+  [:div
+    [:div.tutorial-overlay
+      {:class (if @(rf/subscribe [:tutorial-active]) "active")}
+      [tutorial-player]
+      (-> @(rf/subscribe [:modal])
+        ((fn [{:keys [cancel ok header body] :as rest}]
+          (when body
+            [modal-panel
+                :backdrop-color   "grey"
+                :backdrop-opacity 0.4
+                :style            {:font-family "Consolas"}
+                :child            [:div.my-modal
+                                    [:div.modal-header [:h4.modal-title header]]
+                                    [:div.modal-body body]
+                                    [:div.modal-footer
+                                      [:button.btn.btn-warning {:on-click cancel} "Cancel"]
+                                      [:button.btn.btn-primary {:on-click ok} "Confirm"]]]]))))]])
 
 (defn ^:export run
   []
   (rf/dispatch [:get-batch-details])
   (reagent/render [:div.main 
                     [portal.views/header]
+                    [tutorial]
                     [main-window]]
 
     (js/document.getElementById "app")))

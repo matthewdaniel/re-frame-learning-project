@@ -77,20 +77,29 @@
     :show-finalize-modal
     (fn [db _]
       (assoc db :modal {:header "Confirm Batch Finalize"
-                         :ok #(when true (js/alert "Turned off for demo") (rf/dispatch [:close-finalize-modal]))
+                         :ok #(rf/dispatch [:show-demo-disabled-modal])
                          :cancel #(rf/dispatch [:close-finalize-modal])
                          :body [:div
                                     [:p "By finalizing this batch you will loose access to it in the future."]
                                     [:p "Are you certain you would like to proceed?"]]})))
 
 (rf/reg-event-db
-    :close-finalize-modal
+    :show-demo-disabled-modal
+    (fn [db _]
+        (assoc db :modal {:header "Demo Disabled Feature"
+                          :ok #(rf/dispatch [:close-modal])
+                          :cancel #(rf/dispatch [:close-modal])
+                          :body [:div
+                                    [:h5 "Action disabled"]
+                                    [:p "A few actions are being prevented during the demonstation modal."]]})))
+
+(rf/reg-event-db
+    :close-modal
     (fn [db _] (dissoc db :modal)))
 
 (rf/reg-sub
     :modal
     (fn [{:keys [modal]}]
-      (pprint {:modal-test modal})
       modal))
 
 
@@ -142,7 +151,11 @@
         [item]
         (assoc item :is-mine (mine? sess-id item) :is-someone-elses (someone-elses? sess-id item))))
 
-
+(rf/reg-sub
+    :is-editing-item
+    :<- [:edit-fields]
+    (fn [[fields]]
+        (count fields)))
 
 (rf/reg-event-db
     :list-updated
@@ -152,7 +165,7 @@
                             (snake-kebab-it v)
                             (map (set-checkedout (:sess-id db)) v))
                mine (first (filter #(:is-mine %) transformed))]
-            (rf/dispatch [:editing-field (:id mine)])
+            (rf/dispatch [:editing-fields (:id mine)])
             (assoc db
                     :batch-list transformed))))
 
@@ -178,7 +191,12 @@
         (get-in db [:field-changes field-id])))
 
 (rf/reg-event-fx
-    :editing-field
+    :forget-all-dirty-vals
+    (fn [db _]
+        (dissoc db :field-changes)))
+
+(rf/reg-event-fx
+    :editing-fields
     (fn [{:keys [db]} [_ item-id]]
         (if (not item-id)
             {:db (assoc db :loading-fields false :edit-fields [])}
@@ -254,7 +272,6 @@
 (rf/reg-event-db
     :set-tutorial-step
     (fn [db [_ step]]
-        (pprint {:new-step step})
         (assoc db :tutorial-step step)))
 
 (rf/reg-sub
@@ -374,3 +391,22 @@
     :cancel-finalize-batch
     (fn [db _]
      (dissoc db :finalize-batch)))
+
+(defn- get-percent
+    [items field]
+    (let [total (count items)
+          field-total (count (filter #(get % field) items))]
+        (str (* (/ field-total total) 100) "%")))
+   
+(rf/reg-sub
+    :progress
+    :<- [:batch-list]
+    :<- [:tutorial-i-am-active :progress-bar]
+    (fn [[items showing-tutorial] _]
+        (let [total-count (count items)
+              percenter (partial get-percent items)]
+            (if showing-tutorial
+                {:finalized "10%" :edited "30%" :viewed "70%"}
+                {:finalized (percenter :finalized)
+                    :edited (percenter :edited)
+                    :viewed (percenter :viewed)}))))

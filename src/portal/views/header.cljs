@@ -13,6 +13,7 @@
            ((fn [{:keys [days hours minutes]}]
               (if (or days hours minutes)
                 [:div
+                 [:span [:i.fa.fa-clock-o {:style {:margin-right 10}}]]
                  [:span (if days (str days "D "))]
                  [:span (if hours (str hours "H "))]
                  [:span (if minutes (str minutes "M"))]]))))])
@@ -20,20 +21,22 @@
 
 (defn header
     []
-    [:div.header-bar
+    [:header.header-bar
         [:div.batch-title-bar
             [wrapper :first-time [:div.blains "Vendor Portal Inc"]]
             [:div.title {:on-click #(rf/dispatch [:tutorial/start])} (-> @(rf/subscribe [:batch-overview])
                                                                          (:title))]
-            [:div.countdown
-                (-> @(rf/subscribe [:batch-overview])
-                    (#(when % [wrapper :batch-expires [expiry-element %]])))]]
+            
+            (-> @(rf/subscribe [:batch-overview])
+                (#(when % [wrapper :batch-expires [expiry-element %]])))]
                 
         [wrapper :progress-bar [:div.progress-bar
-                                [:div.background
-                                    [:div.progress.viewed {:style {:width "10%"}}]
-                                    [:div.progress.edited {:style {:width "20%"}}]
-                                    [:div.progress.finalized {:style {:width "30%"}}]]]]])
+                                  (-> @(rf/subscribe [:progress])
+                                      ((fn [{:keys [viewed edited finalized]}]
+                                         [:div.background
+                                            [:div.progress.viewed {:style {:z-index 1 :width viewed}}]
+                                            [:div.progress.edited {:style {:z-index 2 :width edited}}]
+                                            [:div.progress.finalized {:style {:z-index 3 :width finalized}}]])))]]])
 
      
      

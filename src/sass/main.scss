@@ -369,10 +369,8 @@ html, body, #app {
         li { display: none; }
     }
     &.minimized {
-        width: 52px;
-        li {
-            width: 52px;
-        }
+        width: auto;
+        li i { font-size: 16px; padding: 8px;}
         .subtitle {
             display: none;
         }        
