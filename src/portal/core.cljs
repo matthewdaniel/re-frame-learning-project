@@ -35,7 +35,7 @@
              [batch-items-container]
              [edit-bar]
              [fields-container]
-             [:div.tutorial-overlay 
+             [:div.tutorial-overlay
               {:class (if @(rf/subscribe [:tutorial-active]) "active")}]
              [tutorial-player]
              (-> @(rf/subscribe [:modal])

@@ -289,15 +289,17 @@
     :batch-expires
     :<- [:batch-overview]
     :<- [:tutorial-i-am-active :batch-expires]
-    (fn [[{:keys [tokenExpires]} in-tutorial] _]
+    (fn [[{:keys [tokenExpires] :as all} in-tutorial] _]
       (let [expiry (or tokenExpires h/fake-expiry)
-            hours-full (.diff tokenExpires h/now "hours")
-            minutes-full (.diff tokenExpires h/now "minutes")
+            hours-full (.diff expiry h/now "hours")
+            minutes-full (.diff expiry h/now "minutes")
 
-            days (.diff tokenExpires h/now "days")
+            days (.diff expiry h/now "days")
             minutes (- minutes-full  (* hours-full  60))
             hours (- hours-full  (* days  24))]
-           (when (or tokenExpires in-tutorial) {:days days :minutes minutes :hours hours}))))
+
+           (when (or tokenExpires in-tutorial)
+                 {:days days :minutes minutes :hours hours}))))
 
 (rf/reg-event-db
     :tutorial/start
