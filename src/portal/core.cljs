@@ -10,7 +10,7 @@
             [portal.views.tutorial-player :refer [tutorial-player]]
             [portal.views.fields :refer [fields-container]]
             [portal.events]
-            [portal.events :as ev]))
+            [portal.subs]))
 
 (rf/reg-sub
   :batch-overview
