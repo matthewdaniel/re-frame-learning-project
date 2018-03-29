@@ -97,23 +97,6 @@
     :close-modal
     (fn [db _] (dissoc db :modal)))
 
-(rf/reg-sub
-    :modal
-    (fn [{:keys [modal]}]
-      modal))
-
-
-(rf/reg-sub 
-    :show-items-legend
-    (fn [{:keys [show-items-legend]}]
-        show-items-legend))
-
-(rf/reg-sub
-    :items-legend-vis
-    :<- [:show-items-legend]
-    :<- [:tutorial-i-am-active :item-icon-legend]
-    (fn [[show tutorial-active] _]
-        (or show tutorial-active)))
       
 
 
@@ -122,10 +105,6 @@
     (fn [db [_ txt]]
         (assoc db :item-filter txt)))
 
-(rf/reg-sub
-    :item-filter
-    (fn [db _]
-     (:item-filter db)))
 
 (rf/reg-event-db
     :sess-id
@@ -133,10 +112,6 @@
         (assoc db :sess-id sess-id)))
 
 
-(rf/reg-sub
-    :sess-id2
-    (fn [db _]
-        (:sess-id db)))
 
 (defn mine? [sess-id item]
     (= sess-id (:editing item)))
@@ -151,11 +126,7 @@
         [item]
         (assoc item :is-mine (mine? sess-id item) :is-someone-elses (someone-elses? sess-id item))))
 
-(rf/reg-sub
-    :is-editing-item
-    :<- [:edit-fields]
-    (fn [[fields]]
-        (count fields)))
+
 
 (rf/reg-event-db
     :list-updated
@@ -175,20 +146,6 @@
     (fn [db [_ fields]]
       (assoc db :edit-fields (snake-kebab-it fields) :loading-fields false)))
 
-(rf/reg-sub
-    :loading-fields
-    (fn [db _]
-     (:loading-fields db)))
-
-(rf/reg-sub
-    :edit-fields
-    (fn [db _]
-        (:edit-fields db)))
-
-(rf/reg-sub
-    :field-dirty-val
-    (fn [db [_ field-id]]
-        (get-in db [:field-changes field-id])))
 
 (rf/reg-event-fx
     :forget-all-dirty-vals
@@ -214,21 +171,8 @@
         (pprint _)
       db))
 
-(rf/reg-sub
-    :batch-list
-    (fn [{:keys [batch-list]} _]
-        (sort-by #(:id %) batch-list)))
 
-(defn- item-matches-filter
-    [kw item]
-    (s/includes? (s/lower-case (:description item)) (s/lower-case (or kw ""))))
 
-(rf/reg-sub
-    :filtered-batch-items
-    :<- [:batch-list]
-    :<- [:item-filter]
-    (fn [[list key-word] _]
-        (if-not key-word list (filter (partial item-matches-filter key-word) list))))
 
 (rf/reg-event-db
     :set-batch-data
@@ -257,10 +201,6 @@
     (fn [db [_ {:keys [field-id new-value]}]]
         (assoc-in db [:field-changes field-id] new-value)))
 
-(rf/reg-sub
-    :field-changes
-    (fn [db [_ [field-id real-val]]]
-        (get-in db [:field-changes field-id] real-val)))
 
 (rf/reg-event-db
     :clear-field-value
@@ -268,23 +208,7 @@
         (update-in db [:field-changes] dissoc field-id)))
         
 
-        
-(rf/reg-event-db
-    :set-tutorial-step
-    (fn [db [_ step]]
-        (assoc db :tutorial-step step)))
 
-(rf/reg-sub
-    :tutorial-step
-    (fn [{:keys [tutorial-step]} _]
-        tutorial-step))
-
-(rf/reg-sub
-  :tutorial-active
-  :<- [:tutorial-step]
-  (fn [step _]
-    (not (not step))))
-  
 
 (rf/reg-event-db
     :tutorial/start

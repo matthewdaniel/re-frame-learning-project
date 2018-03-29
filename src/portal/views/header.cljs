@@ -24,7 +24,7 @@
     [:header.header-bar
         [:div.batch-title-bar
             [wrapper :first-time [:div.blains "Vendor Portal Inc"]]
-            [:div.title {:on-click #(rf/dispatch [:tutorial/start])} (-> @(rf/subscribe [:batch-overview])
+            [:div.title (-> @(rf/subscribe [:batch-overview])
                                                                          (:title))]
             
             (-> @(rf/subscribe [:batch-overview])

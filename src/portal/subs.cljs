@@ -78,6 +78,84 @@
       (and (not in-maximized-tutorial) (or bar-hidden in-minimize-tutorial))))
 
 (rf/reg-sub
+    :loading-fields
+    (fn [db _]
+     (:loading-fields db)))
+(rf/reg-sub
+    :batch-list
+    (fn [{:keys [batch-list]} _]
+        (sort-by #(:id %) batch-list)))
+(rf/reg-sub
+    :field-changes
+    (fn [db [_ [field-id real-val]]]
+        (get-in db [:field-changes field-id] real-val)))
+        
+(rf/reg-event-db
+    :set-tutorial-step
+    (fn [db [_ step]]
+        (assoc db :tutorial-step step)))
+
+(rf/reg-sub
+    :tutorial-step
+    (fn [{:keys [tutorial-step]} _]
+        tutorial-step))
+
+(rf/reg-sub
+  :tutorial-active
+  :<- [:tutorial-step]
+  (fn [step _]
+    (not (not step))))
+  
+(rf/reg-sub
+    :modal
+    (fn [{:keys [modal]}]
+      modal))
+
+
+(rf/reg-sub 
+    :show-items-legend
+    (fn [{:keys [show-items-legend]}]
+        show-items-legend))
+
+(rf/reg-sub
+    :items-legend-vis
+    :<- [:show-items-legend]
+    :<- [:tutorial-i-am-active :item-icon-legend]
+    (fn [[show tutorial-active] _]
+        (or show tutorial-active)))
+(rf/reg-sub
+    :item-filter
+    (fn [db _]
+     (:item-filter db)))
+
+(rf/reg-sub
+    :is-editing-item
+    :<- [:edit-fields]
+    (fn [[fields]]
+        (> (count fields) 0)))
+
+(defn- item-matches-filter
+    [kw item]
+    (s/includes? (s/lower-case (:description item)) (s/lower-case (or kw ""))))
+
+(rf/reg-sub
+    :filtered-batch-items
+    :<- [:batch-list]
+    :<- [:item-filter]
+    (fn [[list key-word] _]
+        (if-not key-word list (filter (partial item-matches-filter key-word) list))))
+
+(rf/reg-sub
+    :edit-fields
+    (fn [db _]
+        (:edit-fields db)))
+
+(rf/reg-sub
+    :field-dirty-val
+    (fn [db [_ field-id]]
+        (get-in db [:field-changes field-id])))
+
+(rf/reg-sub
   :bar-minimized-class
   (fn [_ _]
       (rf/subscribe [:batch-items/bar-hidden]))

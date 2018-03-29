@@ -108,8 +108,18 @@ html, body, #app {
   z-index: 10000000000;
 }
 
+div.tutorial {
+  padding: 20px;
+}
+
+div.tutorial .section {
+  padding-left: 15px;
+}
+
 .list-box {
   background-color: #f5f5f5;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
   overflow-y: auto;
   width: 250px;
   -webkit-transition: width .25s ease;
@@ -478,6 +488,8 @@ html, body, #app {
 }
 
 .edit-bar {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

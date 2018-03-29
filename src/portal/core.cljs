@@ -7,6 +7,7 @@
             [portal.views]
             [portal.views.batch-items :refer [batch-items-container]]
             [portal.views.edit-bar :refer [edit-bar]]
+            [portal.views.welcome :refer [welcome]]
             [portal.views.tutorial-player :refer [tutorial-player]]
             [portal.views.fields :refer [fields-container]]
             [portal.events]
@@ -23,6 +24,16 @@
     (js/console.log "sess-id" sess-id)
     (not (not sess-id))))
 
+(defn content-window
+  []
+  [:div 
+    (-> @(rf/subscribe [:is-editing-item])
+        ((fn [is]
+          (pprint {:is is}) 
+          (if is 
+            [fields-container]
+            [welcome]))))])
+
 (defn- main-window
   []
   (-> @(rf/subscribe [:initial-load-finished])
@@ -34,7 +45,7 @@
            [:div.main-inner
              [batch-items-container]
              [edit-bar]
-             [fields-container]])))))
+             [content-window]])))))
              
                         
 (defn- tutorial 
