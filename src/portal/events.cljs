@@ -6,6 +6,7 @@
        [goog.string :refer [toSelectorCase toCamelCase]]
        [cljs.pprint :refer [pprint]]
        [day8.re-frame.http-fx]
+        [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
        [portal.tutorials :refer [tutorial-steps]]
        [portal.helpers.misc :as h]
        [clojure.string :as s]
@@ -69,9 +70,11 @@
                                 (checkout "81294b8a-adfb-4687-8b4d-5f12540d3d59" item-id)
                                 db))))))
         nil))
+
+
 (rf/reg-event-db
     :toggle-items-legend
-    (fn [db _]
+    (fn-traced [db _]
         (assoc db :show-items-legend (not (:show-items-legend db)))))
 
 (rf/reg-event-db

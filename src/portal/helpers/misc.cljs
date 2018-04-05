@@ -4,6 +4,9 @@
         [portal.tutorials :refer [tutorial-steps]]
         [ajax.core :as ajax]))
 
+(def <sub (fn [key]  @(re-frame.core/subscribe [key])))
+(def pub> re-frame.core/dispatch)
+
 (defn browser-copy
     [txt]
     (let [el (.createElement js/document "input")]

@@ -1,14 +1,15 @@
 (defproject portal "0.10.5"
-  :dependencies [[org.clojure/clojure        "1.8.0"]
-                 [org.clojure/clojurescript  "1.9.908"]
+  :dependencies [[org.clojure/clojure        "1.9.0"]
+                 [org.clojure/clojurescript  "1.10.238"]
                  [reagent  "0.7.0"]
-                 [cljs-http "0.1.44"]
+                 [cljs-http "0.1.45"]
                  [re-com "0.9.0"]
+                 [day8.re-frame/tracing-stubs "0.5.1"]
                  [camel-snake-kebab "0.4.0"]
                  [fentontravers/reframe-websocket "0.1.4"]
-                 [cljsjs/moment "2.17.1-1"]
+                 [cljsjs/moment "2.22.0-0"]
                  [day8.re-frame/async-flow-fx "0.0.9"]
-                 [day8.re-frame/http-fx "0.1.5"]
+                 [day8.re-frame/http-fx "0.1.6"]
                  [re-frame "0.10.5"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
@@ -18,14 +19,16 @@
 
   :profiles {:dev {
                     :dependencies 
-                    [[day8.re-frame/re-frame-10x "0.3.0"]]
+                    [[day8.re-frame/re-frame-10x "0.3.1"]
+                     [day8.re-frame/tracing "0.5.1"]]
 
                     
                     :cljsbuild
                    {:builds {:client {:figwheel     {:on-jsload "portal.core/run"}
                                       :compiler     {:main "portal.core"
                                                      :asset-path "js"
-                                                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true
+                                                                            "day8.re_frame.tracing.trace_enabled_QMARK_"  true}
                                                      :preloads             [day8.re-frame-10x.preload]
                                                      :optimizations :none
                                                      :source-map true

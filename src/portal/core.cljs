@@ -5,6 +5,7 @@
             [cljs.pprint :refer [pprint]]
             [re-com.core        :refer [modal-panel]]
             [portal.views]
+            [portal.helpers.misc :refer [<sub pub>]]
             [portal.views.batch-items :refer [batch-items-container]]
             [portal.views.edit-bar :refer [edit-bar]]
             [portal.views.welcome :refer [welcome]]
@@ -13,6 +14,8 @@
             [portal.events]
             [portal.subs]))
 (enable-console-print!)
+
+;(rf/defn-traced test [db _] db)
 (rf/reg-sub
   :batch-overview
   (fn [db _]
@@ -37,7 +40,7 @@
 
 (defn- main-window
   []
-  (-> @(rf/subscribe [:initial-load-finished])
+  (-> (<sub :initial-load-finished)
       ((fn [is-subbed]
          (if-not is-subbed
            [:div.connecting
