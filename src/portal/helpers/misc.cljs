@@ -13,7 +13,11 @@
         (.execCommand js/document "copy")
         (.removeChild js/document.body el)))
 
+
 (defn watch-pipe [val] (pprint {:watch val}) val)
+
+(def <sub (comp deref re-frame.core/subscribe))   ;; aka listen (above)
+(def >evt re-frame.core/dispatch)
 
 (defn- make-moment [val]
     (if val (js/moment val) val))

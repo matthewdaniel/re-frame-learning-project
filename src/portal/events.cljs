@@ -1,18 +1,18 @@
 (ns portal.events
-    (:require
-        [day8.re-frame.async-flow-fx]
-        [cljsjs.moment]
-        [camel-snake-kebab.core :refer [->kebab-case]]
-        [goog.string :refer [toSelectorCase toCamelCase]]
-        [cljs.pprint :refer [pprint]]
-        [day8.re-frame.http-fx]
-        [portal.tutorials :refer [tutorial-steps]]
-        [portal.helpers.misc :as h]
-        [clojure.string :as s]
-        [ajax.core :as ajax]
-        [re-frame.core :as rf]
-        [cljs.core.async :refer [<!]] [cljs-http.client :as http])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+   (:require
+       [day8.re-frame.async-flow-fx]
+       [cljsjs.moment]
+       [camel-snake-kebab.core :refer [->kebab-case]]
+       [goog.string :refer [toSelectorCase toCamelCase]]
+       [cljs.pprint :refer [pprint]]
+       [day8.re-frame.http-fx]
+       [portal.tutorials :refer [tutorial-steps]]
+       [portal.helpers.misc :as h]
+       [clojure.string :as s]
+       [ajax.core :as ajax]
+       [re-frame.core :as rf]
+       [cljs.core.async :refer [<!]] [cljs-http.client :as http])
+ (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn can-descend [val]
       (or (seq? val) (map? val) (vector? val)))
@@ -45,28 +45,29 @@
     []
     (js/console.log "connecting")
     (let [con (aget js/window "hubConnection")
-          batchWsApi (aget js/window "batchWsApi")
-          server (aget batchWsApi "server")]
-        (.on batchWsApi "listUpdate" #(rf/dispatch [:list-updated %]))
-        (.on batchWsApi "notifyError" #(rf/dispatch [:list-update-error %]))
+          start (.bind (aget (aget js/window "hubConnection") "start") con)
+          on (.bind (aget (aget js/window "batchWsApi") "on") (aget js/window "batchWsApi"))
+          sub (aget js/window "batch_subscribe")
+          checkout (aget js/window "batch_checkout")]
+        (on "listUpdate" #(rf/dispatch [:list-updated %]))
+        (on "notifyError" #(rf/dispatch [:list-update-error %]))
 
         (js/console.log "START!")
-        (-> (js/window.hubConnection.start)
+        (-> (start)
             (#(.done %
                     (fn [_]
                         ; store the connection sess-id
                         (rf/dispatch [:sess-id (aget con "id")])
 
                         ; tell the backend which batch we are subscribed to
-                        (js/window.batch-subscribe "81294b8a-adfb-4687-8b4d-5f12540d3d59")
+                        (sub "81294b8a-adfb-4687-8b4d-5f12540d3d59")
 
                         ; register ws actions
                         (rf/reg-event-db
                             :checkout-item
                             (fn [db [_ item-id]]
-                                (js/window.batch-checkout "81294b8a-adfb-4687-8b4d-5f12540d3d59" item-id)
+                                (checkout "81294b8a-adfb-4687-8b4d-5f12540d3d59" item-id)
                                 db))))))
-        batchWsApi
         nil))
 (rf/reg-event-db
     :toggle-items-legend

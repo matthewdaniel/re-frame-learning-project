@@ -12,11 +12,12 @@
             [portal.views.fields :refer [fields-container]]
             [portal.events]
             [portal.subs]))
-
+(enable-console-print!)
 (rf/reg-sub
   :batch-overview
   (fn [db _]
     (:batch-overview db)))
+
 
 (rf/reg-sub
   :initial-load-finished
