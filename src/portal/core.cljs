@@ -5,7 +5,7 @@
             [cljs.pprint :refer [pprint]]
             [re-com.core        :refer [modal-panel]]
             [portal.views]
-            [portal.helpers.misc :refer [<sub pub>]]
+            [portal.helpers.misc :refer [<sub <sub-to pub>]]
             [portal.views.batch-items :refer [batch-items-container]]
             [portal.views.edit-bar :refer [edit-bar]]
             [portal.views.welcome :refer [welcome]]
@@ -16,25 +16,14 @@
 (enable-console-print!)
 
 ;(rf/defn-traced test [db _] db)
-(rf/reg-sub
-  :batch-overview
-  (fn [db _]
-    (:batch-overview db)))
-
-
-(rf/reg-sub
-  :initial-load-finished
-  (fn [{:keys [sess-id]} _]
-    (js/console.log "sess-id" sess-id)
-    (not (not sess-id))))
 
 (defn content-window
   []
   [:div 
-    (-> @(rf/subscribe [:is-editing-item])
+    (-> (<sub :is-editing-item)
         ((fn [is]
-          (pprint {:is is}) 
-          (if is 
+          (pprint {:is is})
+          (if is
             [fields-container]
             [welcome]))))])
 
@@ -56,9 +45,9 @@
   []
   [:div
     [:div.tutorial-overlay
-      {:class (if @(rf/subscribe [:tutorial-active]) "active")}
+      {:class (if (<sub :tutorial-active) "active")}
       [tutorial-player]
-      (-> @(rf/subscribe [:modal])
+      (-> (<sub :modal)
         ((fn [{:keys [cancel ok header body] :as rest}]
           (when body
             [modal-panel
@@ -74,7 +63,7 @@
 
 (defn ^:export run
   []
-  (rf/dispatch [:get-batch-details])
+  (pub> [:get-batch-details])
   (reagent/render [:div.main 
                     [portal.views/header]
                     [tutorial]

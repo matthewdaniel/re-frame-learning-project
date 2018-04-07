@@ -1,4 +1,4 @@
-(ns portal.views.field-types.type-ahead
+(ns portal.views.field-types.type_ahead
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [clojure.string :refer [includes? lower-case]]

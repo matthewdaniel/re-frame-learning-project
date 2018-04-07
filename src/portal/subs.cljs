@@ -15,6 +15,18 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (rf/reg-sub
+  :batch-overview
+  (fn [db _]
+      (:batch-overview db)))
+
+
+(rf/reg-sub
+  :initial-load-finished
+  (fn [{:keys [sess-id]} _]
+      (js/console.log "sess-id" sess-id)
+      (not (not sess-id))))
+
+(rf/reg-sub
   :tutorial-i-am-active
   :<- [:tutorial-step]
   (fn [step [_ check-step]]

@@ -1,11 +1,12 @@
 (ns portal.views.field-types.upc
     (:require [reagent.core :as reagent]
               [re-frame.core :as rf]
-              [portal.helpers.misc :refer [browser-copy]]
+              [portal.helpers.misc :refer [<sub <sub-to pub> browser-copy]]
               [cljsjs.moment]
               [cljs.pprint :refer [pprint]]
               [clojure.string :as str]))
 
+;TODO: use reagent atom or something
 (rf/reg-event-db
     :upc-click
     (fn [db [_ upc]] 
@@ -29,14 +30,14 @@
 (defn handle-copy-click
     [upc]
     (browser-copy upc)
-    (rf/dispatch [:upc-click upc])
-    (js/setTimeout #(rf/dispatch [:upc-click false]) 100))
+    (pub> [:upc-click upc])
+    (js/setTimeout #(pub> [:upc-click false]) 100))
 
 (defn upc-field
     [upc]
     [:li.copy {:key upc
                 :on-click #(handle-copy-click upc) 
-                :class @(rf/subscribe [:highlight-class upc])}
+                :class (<sub-to [:highlight-class upc])}
         [:span upc]
         [:svg {:width "14px"
                 :height "16px"

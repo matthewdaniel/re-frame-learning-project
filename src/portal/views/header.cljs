@@ -2,6 +2,7 @@
     (:require [reagent.core :as reagent]
               [re-frame.core :as rf]
               [portal.views.tutorial-wrapper :refer [wrapper]]
+              [portal.helpers.misc :refer [<sub]]
               [cljsjs.moment]
               [cljs.pprint :refer [pprint]]
               [clojure.string :as str]))
@@ -9,7 +10,7 @@
 (defn expiry-element
     [{expires :tokenExpires}]
     [:div.expiry
-       (-> @(rf/subscribe [:batch-expires])
+       (-> (<sub :batch-expires)
            ((fn [{:keys [days hours minutes]}]
               (if (or days hours minutes)
                 [:div
@@ -24,14 +25,13 @@
     [:header.header-bar
         [:div.batch-title-bar
             [wrapper :first-time [:div.blains "Vendor Portal Inc"]]
-            [:div.title (-> @(rf/subscribe [:batch-overview])
-                                                                         (:title))]
+            [:div.title (:title (<sub :batch-overview))]
             
-            (-> @(rf/subscribe [:batch-overview])
+            (-> (<sub :batch-overview)
                 (#(when % [wrapper :batch-expires [expiry-element %]])))]
                 
         [wrapper :progress-bar [:div.progress-bar
-                                  (-> @(rf/subscribe [:progress])
+                                  (-> (<sub :progress)
                                       ((fn [{:keys [viewed edited finalized]}]
                                          [:div.background
                                             [:div.progress.viewed {:style {:z-index 1 :width viewed}}]

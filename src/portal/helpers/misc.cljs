@@ -5,6 +5,7 @@
         [ajax.core :as ajax]))
 
 (def <sub (fn [key]  @(re-frame.core/subscribe [key])))
+(def <sub-to (comp deref re-frame.core/subscribe))
 (def pub> re-frame.core/dispatch)
 
 (defn browser-copy
@@ -19,8 +20,6 @@
 
 (defn watch-pipe [val] (pprint {:watch val}) val)
 
-(def <sub (comp deref re-frame.core/subscribe))   ;; aka listen (above)
-(def >evt re-frame.core/dispatch)
 
 (defn- make-moment [val]
     (if val (js/moment val) val))

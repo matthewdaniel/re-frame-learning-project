@@ -2,6 +2,7 @@
     (:require [reagent.core :as reagent]
               [re-frame.core :as rf]
               [portal.views.tutorial-wrapper :refer [wrapper]]
+              [portal.helpers.misc :refer [pub>]]
               [cljsjs.moment]
               [cljs.pprint :refer [pprint]]
               [clojure.string :as str]))
@@ -17,5 +18,5 @@
             [:h3 "Tutorial"]
             [:p "We have prepared a guided walthrough to help you see how to use the system. Click 'Begin Tutorial' below to start."]
             [:button.btn.btn-success 
-                {:on-click #(rf/dispatch [:tutorial/start])}
+                {:on-click #(pub> [:tutorial/start])}
                 "Begin Tutorial"]]])

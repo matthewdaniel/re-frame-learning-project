@@ -6,9 +6,9 @@
        [goog.string :refer [toSelectorCase toCamelCase]]
        [cljs.pprint :refer [pprint]]
        [day8.re-frame.http-fx]
-        [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
+       [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
        [portal.tutorials :refer [tutorial-steps]]
-       [portal.helpers.misc :as h]
+       [portal.helpers.misc :refer [<sub <sub-to pub>] :as h]
        [clojure.string :as s]
        [ajax.core :as ajax]
        [re-frame.core :as rf]
@@ -50,15 +50,15 @@
           on (.bind (aget (aget js/window "batchWsApi") "on") (aget js/window "batchWsApi"))
           sub (aget js/window "batch_subscribe")
           checkout (aget js/window "batch_checkout")]
-        (on "listUpdate" #(rf/dispatch [:list-updated %]))
-        (on "notifyError" #(rf/dispatch [:list-update-error %]))
+        (on "listUpdate" #(pub> [:list-updated %]))
+        (on "notifyError" #(pub> [:list-update-error %]))
 
         (js/console.log "START!")
         (-> (start)
             (#(.done %
                     (fn [_]
                         ; store the connection sess-id
-                        (rf/dispatch [:sess-id (aget con "id")])
+                        (pub> [:sess-id (aget con "id")])
 
                         ; tell the backend which batch we are subscribed to
                         (sub "81294b8a-adfb-4687-8b4d-5f12540d3d59")
@@ -81,8 +81,8 @@
     :show-finalize-modal
     (fn [db _]
       (assoc db :modal {:header "Confirm Batch Finalize"
-                         :ok #(rf/dispatch [:show-demo-disabled-modal])
-                         :cancel #(rf/dispatch [:close-finalize-modal])
+                         :ok #(pub> [:show-demo-disabled-modal])
+                         :cancel #(pub> [:close-finalize-modal])
                          :body [:div
                                     [:p "By finalizing this batch you will loose access to it in the future."]
                                     [:p "Are you certain you would like to proceed?"]]})))
@@ -91,8 +91,8 @@
     :show-demo-disabled-modal
     (fn [db _]
         (assoc db :modal {:header "Demo Disabled Feature"
-                          :ok #(rf/dispatch [:close-modal])
-                          :cancel #(rf/dispatch [:close-modal])
+                          :ok #(pub> [:close-modal])
+                          :cancel #(pub> [:close-modal])
                           :body [:div
                                     [:h5 "Action disabled"]
                                     [:p "A few actions are being prevented during the demonstation modal."]]})))
@@ -140,7 +140,7 @@
                             (snake-kebab-it v)
                             (map (set-checkedout (:sess-id db)) v))
                mine (first (filter #(:is-mine %) transformed))]
-            (rf/dispatch [:editing-fields (:id mine)])
+            (pub> [:editing-fields (:id mine)])
             (assoc db
                     :batch-list transformed))))
 
@@ -239,7 +239,7 @@
         
 (rf/reg-event-db 
     :batch-items/hide-bar
-    (fn [db [_ hide]]
+    (fn-traced [db [_ hide]]
         (assoc db :batch-items/hide-bar hide)))
 
 

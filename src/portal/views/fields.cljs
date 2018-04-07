@@ -1,11 +1,12 @@
 (ns portal.views.fields
     (:require [reagent.core :as reagent]
               [re-frame.core :as rf]
+              [portal.helpers.misc :refer [<sub <sub-to pub>]]
               [portal.views.field-types.html :refer [field] :rename {field html-field}]
               [portal.views.field-types.text :refer [field] :rename {field text-field}]
               [portal.views.field-types.upc :refer [field] :rename {field upc-field}]
-              [portal.views.field-types.text-area :refer [field] :rename {field text-area-field}]
-              [portal.views.field-types.type-ahead :refer [field] :rename {field type-ahead-field}]
+              [portal.views.field-types.text_area :refer [field] :rename {field text-area-field}]
+              [portal.views.field-types.type_ahead :refer [field] :rename {field type-ahead-field}]
               [cljsjs.moment]
               [cljs.pprint :refer [pprint]]
               [clojure.string :as str]))
@@ -25,9 +26,9 @@
 (defn field-label
     [label-value field-id]
     [:label.control-label.field-label
-        {:on-click #(rf/dispatch [:clear-field-value field-id])}
+        {:on-click #(pub> [:clear-field-value field-id])}
         [:label [:span label-value]
-           (-> @(rf/subscribe [:field-dirty-val field-id])
+           (-> (<sub-to [:field-dirty-val field-id])
                (#(if % [:i.dirty-icon.fa.fa-trash
                           {:title (str "This value has changed but not been saved. Previous value: " %)}])))]])
 
@@ -54,10 +55,8 @@
 (defn fields-container
     []
     [:div.fields-container
-        (-> @(rf/subscribe [:loading-fields])
-            (#(if % [:div.loading "Loading..."])))
-        (->> @(rf/subscribe [:edit-fields])
-             (map single-field))])
+        (if (<sub :loading-fields) [:div.loading "Loading..."])
+        (map single-field (<sub :edit-fields))])
                  
                     
                 
